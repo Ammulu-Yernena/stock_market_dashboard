@@ -39,12 +39,15 @@ filtered_data = df[(df["company"] == selected_company) & (df["sector"].isin(sele
 st.title(f"📈 {selected_company} Stock Analysis Dashboard")
 
 # Display Metrics
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Latest Close Price", f"${filtered_data['close_price'].iloc[-1]:,.2f}")
-col2.metric("Market Cap", f"${filtered_data['market_cap'].iloc[-1]:,.2f} B")
-col3.metric("P/E Ratio", f"{filtered_data['pe_ratio'].iloc[-1]:.2f}")
-col4.metric("Trading Volume", f"{filtered_data['volume'].iloc[-1]:,}")
-
+if not filtered_data.empty:
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Latest Close Price", f"${filtered_data['close_price'].iloc[-1]:,.2f}")
+    col2.metric("Market Cap", f"${filtered_data['market_cap'].iloc[-1]:,.2f} B")
+    col3.metric("P/E Ratio", f"{filtered_data['pe_ratio'].iloc[-1]:.2f}")
+    col4.metric("Trading Volume", f"{filtered_data['volume'].iloc[-1]:,}")
+else:
+    st.warning("No data available for the selected company and sector.")
+    
 # Stock Price Trend
 st.subheader("📊 Stock Price Trend")
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -66,7 +69,8 @@ st.pyplot(fig)
 
 # Market Cap by Sector
 st.subheader("🏢 Sector-wise Market Cap Comparison")
-sector_data = df.groupby("sector")["market_cap"].sum().reset_index()
+sector_filtered_df = df[df["sector"].isin(selected_sector)]
+sector_data = sector_filtered_df.groupby("sector")["market_cap"].sum().reset_index()
 fig, ax = plt.subplots(figsize=(8, 4))
 sns.barplot(data=sector_data, x="sector", y="market_cap", palette="coolwarm")
 ax.set_xlabel("Sector")
